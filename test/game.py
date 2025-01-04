@@ -7,7 +7,7 @@ WIDTH = 800
 HEIGHT = 600
 
 # Som da introdução
-# sounds.kalimba_game.play()
+sounds.kalimba_game.play()
 
 # Variáveis de estado do jogo
 player_health = 1000
@@ -29,9 +29,6 @@ enemy_sprites = {
 frame_index = 0
 frame_time = 0.2  # Tempo entre os frames (em segundos)
 last_frame_time = time.time()
-
-# Fundo
-background = Actor("fundo", (WIDTH // 2, HEIGHT // 2))
 
 # Jogador
 player = Actor(player_sprites["stand"][0], (WIDTH // 2, HEIGHT // 2))
@@ -60,10 +57,6 @@ def generate_new_room():
 
     # Atualiza o número da sala
     current_room += 1
-
-    # Plano de fundo
-    fundo = Actor("fundo")
-    fundo.pos = (WIDTH - 800, HEIGHT - 600)
 
     # Reposiciona o jogador na entrada
     player.pos = (50, HEIGHT // 2)

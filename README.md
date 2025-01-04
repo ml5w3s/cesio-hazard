@@ -1,12 +1,18 @@
+# Césio Hazard
+
+## Requisitos
+- Python >= 3.x
+- `pip` para gerenciar dependências
+- PgZero
+- Pygame (apenas para a classe `Rect`)
+
+## Instalação
+1. Clone o repositório:
+   ```bash
+   git clone git@github.com:ml5w3s/cesio-hazard.git
 # Jogo de Sobrevivência Top-Down
 
 Um jogo simples inspirado em mecânicas de sobrevivência top-down, onde o jogador precisa, acessar uma porta, para passar de sala, evitando inimigos que o perseguem e causam dano ao chegar muito perto.
-
-## Requisitos
-
-- Python 3.x
-- PgZero
-- Pygame (apenas para a classe `Rect`)
 
 ## Como Jogar
 
