@@ -112,6 +112,7 @@ def update():
         update_game()
 
     elif game_state == "exit":
+        em_breve.draw()
         time.sleep(2)
         exit()
 
