@@ -1,9 +1,13 @@
 import random
+import time
 from pgzero.actor import Actor
 
 # Configuração da tela
 WIDTH = 800
 HEIGHT = 600
+
+# Som da introdução
+sounds.kalimba_game.play()
 
 # Variáveis de estado do jogo
 player_health = 1000
@@ -11,8 +15,23 @@ current_room = 1
 game_over = False
 game_won = False
 
+# Sprites e animações
+player_sprites = {
+    "stand": ["player/player_stand_1", "player/player_stand_2"],
+    "walk": ["player/player_walk_1", "player/player_walk_2"]
+}
+enemy_sprites = {
+    "stand": ["enemy/enemy_stand_1", "enemy/enemy_stand_2"],
+    "walk": ["enemy/enemy_walk_1", "enemy/enemy_walk_2"]
+}
+
+# Controle de frames para animação
+frame_index = 0
+frame_time = 0.2  # Tempo entre os frames (em segundos)
+last_frame_time = time.time()
+
 # Jogador
-player = Actor("player/player_stand", (WIDTH // 2, HEIGHT // 2))
+player = Actor(player_sprites["stand"][0], (WIDTH // 2, HEIGHT // 2))
 
 # Porta
 door = Actor("door", (WIDTH - 50, HEIGHT // 2))
@@ -26,7 +45,7 @@ obstacles = [
 
 # Inimigos
 enemies = [
-    Actor("enemy/enemy_stand", (random.randint(0, WIDTH), random.randint(0, HEIGHT)))
+    Actor(enemy_sprites["stand"][0], (random.randint(0, WIDTH), random.randint(0, HEIGHT)))
     for _ in range(3)
 ]
 
@@ -47,7 +66,7 @@ def generate_new_room():
 
     # Gera novos inimigos
     enemies = [
-        Actor("enemy/enemy_stand", (random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100)))
+        Actor(enemy_sprites["stand"][0], (random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100)))
         for _ in range(3)
     ]
 
@@ -68,7 +87,7 @@ def draw():
         return
 
     if game_won:
-        screen.fill((0, 0, 0))  # Fundo preto
+        screen.fill((0, 45, 0))  # Fundo verde
         screen.draw.text("Você Venceu!", center=(WIDTH // 2, HEIGHT // 2), fontsize=50, color="green")
         screen.draw.text(f"Sala alcançada: {current_room}", center=(WIDTH // 2, HEIGHT // 2 + 50), fontsize=30, color="white")
         return
@@ -90,21 +109,38 @@ def update():
     """
     Atualiza os estados do jogo.
     """
-    global player_health, game_over, game_won
+    global player_health, game_over, game_won, frame_index, last_frame_time
 
     if game_over or game_won:
         return
 
+    # Controle da animação por tempo
+    now = time.time()
+    if now - last_frame_time > frame_time:
+        last_frame_time = now
+        frame_index = (frame_index + 1) % len(player_sprites["stand"])
+
     # Movimento do jogador
     dx = dy = 0
+    moving = False
     if keyboard.left:
         dx -= 5
+        moving = True
     if keyboard.right:
         dx += 5
+        moving = True
     if keyboard.up:
         dy -= 5
+        moving = True
     if keyboard.down:
         dy += 5
+        moving = True
+
+    # Alterna entre os sprites de acordo com o movimento
+    if moving:
+        player.image = player_sprites["walk"][frame_index]
+    else:
+        player.image = player_sprites["stand"][frame_index]
 
     # Atualiza a posição do jogador
     player.x += dx
@@ -113,6 +149,7 @@ def update():
     # Verifica colisão com obstáculos
     for obstacle in obstacles:
         if player.colliderect(obstacle):
+            sounds.ops.play()  # Toca o som ao colidir
             player.x -= dx  # Reverte o movimento
             player.y -= dy  # Reverte o movimento
 
@@ -131,6 +168,7 @@ def update():
 
     # Verifica colisão com a porta
     if player.colliderect(door):
+        sounds.go.play()
         print("Mudando para uma nova sala!")
         generate_new_room()
 
@@ -143,9 +181,13 @@ def update():
     for enemy in enemies:
         if player.x > enemy.x:
             enemy.x += 2
+            enemy.image = enemy_sprites["walk"][frame_index]
         if player.x < enemy.x:
             enemy.x -= 2
+            enemy.image = enemy_sprites["walk"][frame_index]
         if player.y > enemy.y:
             enemy.y += 2
+            enemy.image = enemy_sprites["walk"][frame_index]
         if player.y < enemy.y:
             enemy.y -= 2
+            enemy.image = enemy_sprites["walk"][frame_index]
