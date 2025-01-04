@@ -25,3 +25,5 @@ Um jogo simples inspirado em mecânicas de sobrevivência top-down, onde o jogad
 1. Certifique-se de que as dependências estão instaladas:
    ```bash
    pip install pgzero
+   cd cesio-hazard
+   pgzrun /src/game_cesio.py
