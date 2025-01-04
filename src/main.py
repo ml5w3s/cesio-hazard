@@ -1,16 +1,75 @@
-# This is a sample Python script.
+from pgzero.actor import Actor  # Importa a classe Actor para gerenciar sprites
+import random
 
-# Press Ctrl+F5 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+class Character:
+    """
+    Classe base para personagens com movimento e animação.
+    """
+
+    def __init__(self, animations, initial_state, position):
+        self.animations = animations
+        self.state = initial_state
+        self.actor = Actor(animations[initial_state][0], position)
+        self.frame = 0
+        self.frame_timer = 0
+        self.x, self.y = position
+
+    def update_position(self, dx=0, dy=0):
+        self.x += dx
+        self.y += dy
+        self.actor.pos = (self.x, self.y)
+
+    def set_state(self, new_state):
+        if new_state != self.state:
+            self.state = new_state
+            self.frame = 0
+
+    def update_animation(self):
+        self.frame_timer += 1
+        if self.frame_timer >= 5:
+            self.frame_timer = 0
+            self.frame = (self.frame + 1) % len(self.animations[self.state])
+            self.actor.image = self.animations[self.state][self.frame]
+
+    def draw(self):
+        self.actor.draw()
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f"Hi, {name}")  # Press F9 to toggle the breakpoint.
+class Player(Character):
+    """
+    Classe para o jogador.
+    """
+
+    def handle_input(self, keyboard):
+        dx = dy = 0
+        if keyboard.left:
+            dx -= 5
+        if keyboard.right:
+            dx += 5
+        if keyboard.up:
+            dy -= 5
+        if keyboard.down:
+            dy += 5
+
+        self.set_state("walk" if dx != 0 or dy != 0 else "stand")
+        self.update_position(dx, dy)
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == "__main__":
-    print_hi("Here tank-combat :v")
+class Enemy(Character):
+    """
+    Classe para os inimigos.
+    """
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    def follow(self, target):
+        dx = dy = 0
+        if target[0] > self.x:
+            dx += 2
+        if target[0] < self.x:
+            dx -= 2
+        if target[1] > self.y:
+            dy += 2
+        if target[1] < self.y:
+            dy -= 2
+
+        self.set_state("walk" if dx != 0 or dy != 0 else "stand")
+        self.update_position(dx, dy)
