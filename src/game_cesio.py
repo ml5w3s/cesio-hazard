@@ -198,14 +198,16 @@ def update_game():
     # Colisão com obstáculos
     for obstacle in obstacles:
         if player.colliderect(obstacle):
-            sounds.ops.play()
+            if sound_enabled:
+                sounds.ops.play()
             player.x -= dx
             player.y -= dy
 
     # Colisão com inimigos
     for enemy in enemies:
         if player.colliderect(enemy):
-            sounds.ops.play()
+            if sound_enabled:
+                sounds.ops.play()
             player_health -= 10
 
         # Movimento dos inimigos em direção ao jogador
@@ -226,7 +228,8 @@ def update_game():
     if player_health <= 0:
         game_over = True
     elif player.colliderect(door):
-        sounds.go.play()
+        if sound_enabled:
+            sounds.go.play()
         current_room += 1
         if current_room > 15:
             game_won = True
