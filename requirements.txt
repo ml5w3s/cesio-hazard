@@ -1,3 +1,5 @@
-pgzero~=1.2.1
-
 pygame~=2.6.1
+pgzero~=1.2.1
+time
+random
+pgzrun

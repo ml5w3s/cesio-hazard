@@ -1,6 +1,7 @@
 from time import sleep
 from pgzero.actor import Actor
 import pgzrun
+
 import subprocess
 
 # Configurações da tela
