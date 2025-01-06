@@ -207,7 +207,7 @@ def update_game():
     for enemy in enemies:
         if player.colliderect(enemy):
             if sound_enabled:
-                sounds.ops.play()
+                sounds.eep.play()
             player_health -= 10
 
         # Movimento dos inimigos em direção ao jogador

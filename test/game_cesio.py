@@ -15,6 +15,7 @@ if sound_enabled:
 # Estados do jogo
 game_state = "intro"  # intro, menu, countdown, playing, exit
 menu_options = ["Começar o jogo", "Música e sons: Ligado", "Sair"]
+end_options = ["Jogar Novamente", "Sair"]
 countdown = 3
 
 # Sprites e animações
@@ -60,6 +61,8 @@ def draw():
         screen.draw.text(f"{countdown}", center=(WIDTH // 2, HEIGHT // 2), fontsize=100, color="white")
     elif game_state == "playing":
         draw_game()
+    elif game_state in ("game_over", "game_won"):
+        draw_end_screen()
     elif game_state == "exit":
         em_breve.draw()
 
@@ -69,24 +72,23 @@ def draw_menu():
     for i, option in enumerate(menu_options):
         screen.draw.text(option, center=(WIDTH // 2, 300 + i * 50), fontsize=60, color="black")
 
+# Função para desenhar a tela de fim de jogo
+def draw_end_screen():
+    if game_won:
+        screen.fill((0, 45, 0))
+        screen.draw.text("Você Venceu!", center=(WIDTH // 2, HEIGHT // 2 - 50), fontsize=50, color="green")
+    else:
+        screen.fill((0, 0, 0))
+        screen.draw.text("Você Perdeu!", center=(WIDTH // 2, HEIGHT // 2 - 50), fontsize=50, color="red")
+
+    for i, option in enumerate(end_options):
+        screen.draw.text(option, center=(WIDTH // 2, HEIGHT // 2 + 50 + i * 50), fontsize=40, color="white")
+
 # Função para desenhar o jogo principal
 def draw_game():
     global player_health, current_room
 
-    if game_over:
-        screen.fill((0, 0, 0))  # Fundo preto
-        screen.draw.text("Você Perdeu!", center=(WIDTH // 2, HEIGHT // 2), fontsize=50, color="red")
-        screen.draw.text(f"Sala alcançada: {current_room}", center=(WIDTH // 2, HEIGHT // 2 + 50), fontsize=30, color="white")
-        return
-
-    if game_won:
-        screen.fill((0, 45, 0))  # Fundo verde
-        screen.draw.text("Você Venceu!", center=(WIDTH // 2, HEIGHT // 2), fontsize=50, color="green")
-        screen.draw.text(f"Sala alcançada: {current_room}", center=(WIDTH // 2, HEIGHT // 2 + 50), fontsize=30, color="white")
-        return
-
-    # Desenha o jogo
-    screen.fill((0, 0, 0))  # Fundo preto
+    screen.blit("fundo", (0, 0))  # Desenha o plano de fundo na tela toda
     player.draw()
     door.draw()
     for enemy in enemies:
@@ -107,23 +109,19 @@ def update():
         countdown -= 1
         if countdown <= 0:
             start_game()
-
     elif game_state == "playing":
         update_game()
-
     elif game_state == "exit":
         time.sleep(2)
         exit()
 
 # Função para tratar cliques do mouse
 def on_mouse_down(pos):
-    global game_state, sound_enabled
+    global game_state, sound_enabled, game_over, game_won
 
     if game_state == "intro":
-        # Qualquer clique na tela move para o menu
         game_state = "menu"
     elif game_state == "menu":
-        # Verifica qual opção do menu foi clicada
         for i, option in enumerate(menu_options):
             option_rect = Rect((WIDTH // 2 - 200, 300 + i * 50 - 20), (400, 40))
             if option_rect.collidepoint(pos):
@@ -137,6 +135,14 @@ def on_mouse_down(pos):
                     else:
                         sounds.kalimba_game.stop()
                 elif i == 2:  # Sair
+                    game_state = "exit"
+    elif game_state in ("game_over", "game_won"):
+        for i, option in enumerate(end_options):
+            option_rect = Rect((WIDTH // 2 - 200, HEIGHT // 2 + 50 + i * 50 - 20), (400, 40))
+            if option_rect.collidepoint(pos):
+                if i == 0:  # Jogar novamente
+                    reset_game()
+                elif i == 1:  # Sair
                     game_state = "exit"
 
 # Função para inicializar o jogo principal
@@ -154,9 +160,17 @@ def start_game():
         Actor(enemy_sprites["stand"][0], (random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100)))
         for _ in range(3)
     ]
+    player_health = 1000
+    current_room = 1
     game_over = False
     game_won = False
     game_state = "playing"
+
+# Função para reiniciar o jogo
+def reset_game():
+    global game_state, countdown
+    countdown = 3
+    game_state = "countdown"
 
 # Função para atualizar o jogo principal
 def update_game():
@@ -197,14 +211,16 @@ def update_game():
     # Colisão com obstáculos
     for obstacle in obstacles:
         if player.colliderect(obstacle):
-            sounds.ops.play()
+            if sound_enabled:
+                sounds.ops.play()
             player.x -= dx
             player.y -= dy
 
     # Colisão com inimigos
     for enemy in enemies:
         if player.colliderect(enemy):
-            sounds.ops.play()
+            if sound_enabled:
+                sounds.eep.play()
             player_health -= 10
 
         # Movimento dos inimigos em direção ao jogador
@@ -224,11 +240,14 @@ def update_game():
     # Verificar vitória ou derrota
     if player_health <= 0:
         game_over = True
+        game_state = "game_over"
     elif player.colliderect(door):
-        sounds.go.play()
+        if sound_enabled:
+            sounds.go.play()
         current_room += 1
         if current_room > 15:
             game_won = True
+            game_state = "game_won"
         else:
             start_game()
 
