@@ -108,9 +108,9 @@ class Game:
             self.draw_game_over()
 
     def draw_menu(self):
-        screen.draw.text("MENU", center=(WIDTH // 2, 100), fontsize=80, color="green")
+        screen.draw.text("MENU", center=(WIDTH // 2, 100), fontsize=80, color="orange")
         for i, option in enumerate(self.menu_options):
-            color = "black" if i == self.menu_selected else "gray"
+            color = "black" if i == self.menu_selected else "black"
             screen.draw.text(option, center=(WIDTH // 2, 300 + i * 50), fontsize=60, color=color)
 
     def draw_game(self):
