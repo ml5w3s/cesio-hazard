@@ -1,6 +1,7 @@
 import time
 import random
 import pgzrun
+from time import sleep
 from pgzero.actor import Actor
 
 # Configurações da tela
@@ -26,6 +27,7 @@ class Game:
         # Intro e menu
         self.capa = Actor("capa", (WIDTH // 2, HEIGHT // 2))
         self.capa_desfocada = Actor("capa_desfocada", (WIDTH // 2, HEIGHT // 2))
+        self.em_breve = Actor("em_breve", (WIDTH // 2, HEIGHT // 2))
         self.menu_options = ["Começar o jogo", "Música e sons: Ligado", "Sair"]
         self.end_options = ["Jogar Novamente", "Sair"]
         self.menu_selected = -1
@@ -145,6 +147,8 @@ class Game:
                     else:
                         sounds.kalimba_game.stop()
                 elif i == 2:  # Sair
+                    self.em_breve.draw()
+                    time.sleep(2)
                     self.state = "exit"
 
     def handle_game_over_click(self, pos):
@@ -155,6 +159,8 @@ class Game:
                     self.countdown = 3
                     self.state = "countdown"
                 elif i == 1:  # Sair
+                    self.em_breve.draw()
+                    time.sleep(2)
                     self.state = "exit"
 
 class Player:
