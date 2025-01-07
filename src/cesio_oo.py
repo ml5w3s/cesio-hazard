@@ -1,3 +1,11 @@
+"""
+Este é o módulo principal do jogo Cesio Hazard.
+
+Ele define todas as classes e funções necessárias para gerenciar o jogo,
+incluindo lógica de atualização, desenho na tela, detecção de colisões,
+e a interface do menu.
+"""
+
 import time
 import random
 import pgzrun
@@ -12,7 +20,24 @@ HEIGHT = 600
 fundo = "fundo"  # "fundo.png" na pasta "images"
 
 class Game:
+    """
+    Classe principal do jogo, gerencia o estado, a lógica e o fluxo do jogo.
+
+    Atributos:
+        state (str): Estado atual do jogo (intro, menu, countdown, playing, game_over, game_won).
+        countdown (int): Contador regressivo antes de iniciar o jogo.
+        current_room (int): Número da sala atual.
+        player (Player): Objeto representando o jogador.
+        enemies (list[Enemy]): Lista de inimigos na sala.
+        obstacles (list[Obstacle]): Lista de obstáculos na sala.
+        door (Door): Objeto representando a porta de saída da sala.
+        menu_options (list[str]): Opções do menu principal.
+        end_options (list[str]): Opções do menu de fim de jogo.
+    """
     def __init__(self):
+        """
+        Inicializa o estado do jogo, incluindo os atores e os menus.
+        """
         self.state = "intro"
         self.countdown = 3
         self.last_countdown_time = time.time()
@@ -36,6 +61,9 @@ class Game:
             sounds.kalimba_game.play()
 
     def start_game(self):
+        """
+        Inicia uma nova partida, criando o jogador, os inimigos, os obstáculos e a porta.
+        """
         self.player = Player(WIDTH // 2, HEIGHT // 2)
         self.door = Door(WIDTH - 50, HEIGHT // 2)
         self.enemies = [Enemy(random.randint(100, WIDTH - 100), random.randint(100, HEIGHT - 100)) for _ in range(3)]
@@ -48,6 +76,11 @@ class Game:
         self.current_room = 1
 
     def update(self):
+        """
+        Atualiza o estado do jogo com base no estado atual.
+
+        Controla a contagem regressiva, movimentação do jogador, e detecção de colisões.
+        """
         if self.state == "countdown":
             now = time.time()
             if now - self.last_countdown_time > 1:
@@ -64,12 +97,15 @@ class Game:
                 enemy.move_towards(self.player)
 
     def check_collisions(self):
+        """
+        Verifica colisões entre o jogador e outros objetos, incluindo obstáculos, inimigos e porta.
+        """
         # Checar colisão do jogador com obstáculos
         for obstacle in self.obstacles:
             if self.player.actor.colliderect(obstacle.actor):
                 self.player.revert_position()
                 if self.sound_enabled:
-                    sounds.eep.play()
+                    sounds.ops.play()
 
         # Checar colisão do jogador com inimigos
         for enemy in self.enemies:
@@ -93,6 +129,9 @@ class Game:
                 self.start_game()
 
     def draw(self):
+        """
+        Desenha na tela com base no estado atual do jogo.
+        """
         if self.state == "intro":
             self.capa.draw()
         elif self.state == "menu":
@@ -110,12 +149,18 @@ class Game:
             self.draw_game_over()
 
     def draw_menu(self):
+        """
+        Desenha o menu principal na tela.
+        """
         screen.draw.text("MENU", center=(WIDTH // 2, 100), fontsize=80, color="orange")
         for i, option in enumerate(self.menu_options):
             color = "black" if i == self.menu_selected else "black"
             screen.draw.text(option, center=(WIDTH // 2, 300 + i * 50), fontsize=60, color=color)
 
     def draw_game(self):
+        """
+        Desenha o jogo principal, incluindo o jogador, inimigos, porta e obstáculos.
+        """
         screen.blit(fundo, (0, 0))  # Desenha o plano de fundo
         self.player.draw()
         self.door.draw()
@@ -127,12 +172,21 @@ class Game:
         screen.draw.text(f"Saúde: {self.player.health}", (10, 50), fontsize=30, color="white")
 
     def draw_game_over(self):
+        """
+        Desenha a tela de fim de jogo com as opções disponíveis.
+        """
         screen.fill((0, 0, 0))
         screen.draw.text("Você Perdeu!", center=(WIDTH // 2, HEIGHT // 2 - 50), fontsize=50, color="red")
         for i, option in enumerate(self.end_options):
             screen.draw.text(option, center=(WIDTH // 2, HEIGHT // 2 + 50 + i * 50), fontsize=40, color="white")
 
     def handle_menu_click(self, pos):
+        """
+        Lida com cliques no menu principal.
+
+        Args:
+            pos (tuple): Posição do clique do mouse.
+        """
         for i, option in enumerate(self.menu_options):
             option_rect = Rect((WIDTH // 2 - 200, 300 + i * 50 - 20), (400, 40))
             if option_rect.collidepoint(pos):
@@ -152,6 +206,12 @@ class Game:
                     self.state = "exit"
 
     def handle_game_over_click(self, pos):
+        """
+        Lida com cliques na tela de fim de jogo.
+
+        Args:
+            pos (tuple): Posição do clique do mouse.
+        """
         for i, option in enumerate(self.end_options):
             option_rect = Rect((WIDTH // 2 - 200, HEIGHT // 2 + 50 + i * 50 - 20), (400, 40))
             if option_rect.collidepoint(pos):
@@ -164,6 +224,9 @@ class Game:
                     self.state = "exit"
 
 class Player:
+    """
+    Representa o jogador, implementar seus movimento e a animação dos sprites.
+    """
     def __init__(self, x, y):
         self.health = 1000
         self.actor = Actor("player/player_stand_1", (x, y))
@@ -212,6 +275,9 @@ class Player:
         self.actor.draw()
 
 class Enemy:
+    """
+    Representa inimigos, implementar seus movimento e a animação dos sprites.
+    """
     def __init__(self, x, y):
         self.actor = Actor("enemy/enemy_stand_1", (x, y))
         self.sprites = {
@@ -242,6 +308,9 @@ class Enemy:
         self.actor.draw()
 
 class Obstacle:
+    """
+    Representa as barreiras.
+    """
     def __init__(self, x, y):
         self.actor = Actor("obstacle", (x, y))
 
@@ -249,12 +318,17 @@ class Obstacle:
         self.actor.draw()
 
 class Door:
+    """
+    Representa a porta, que serve de passagem para outra sala.
+    """
     def __init__(self, x, y):
         self.actor = Actor("door", (x, y))
 
     def draw(self):
         self.actor.draw()
-
+"""
+Objeto, game, que representa a classe Game, e roda os métodos criados.
+"""
 game = Game()
 
 def draw():
