@@ -73,7 +73,6 @@ class Game:
             Obstacle(600, 200)
         ]
         self.state = "playing"
-        self.current_room = 1
 
     def update(self):
         """
@@ -145,6 +144,7 @@ class Game:
         elif self.state == "game_won":
             screen.fill((0, 45, 0))
             screen.draw.text("Você Venceu!", center=(WIDTH // 2, HEIGHT // 2), fontsize=50, color="green")
+            self.state = "exit"
         elif self.state == "game_over":
             self.draw_game_over()
 
@@ -168,8 +168,8 @@ class Game:
             enemy.draw()
         for obstacle in self.obstacles:
             obstacle.draw()
-        screen.draw.text(f"Sala: {self.current_room}", (10, 10), fontsize=30, color="white")
-        screen.draw.text(f"Saúde: {self.player.health}", (10, 50), fontsize=30, color="white")
+        screen.draw.text(f"Sala: {self.current_room}", (10, 10), fontsize=28, color="white")
+        screen.draw.text(f"Saúde: {self.player.health}", (10, 50), fontsize=28, color="white")
 
     def draw_game_over(self):
         """
@@ -201,8 +201,8 @@ class Game:
                     else:
                         sounds.kalimba_game.stop()
                 elif i == 2:  # Sair
-                    self.em_breve.draw()
                     time.sleep(2)
+                    self.em_breve.draw()
                     self.state = "exit"
 
     def handle_game_over_click(self, pos):
